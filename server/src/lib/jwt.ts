@@ -1,34 +1,26 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
+
 import type { TokenPayload } from "@/types/express";
-
-const getAccessSecret = (): string =>
-  process.env.JWT_ACCESS_SECRET || "default_access_secret_key";
-
-const getRefreshSecret = (): string =>
-  process.env.JWT_REFRESH_SECRET || "default_refresh_secret_key";
-
-const getAccessExpiresIn = (): string =>
-  process.env.JWT_ACCESS_EXPIRES_IN || "15m";
-
-const getRefreshExpiresIn = (): string =>
-  process.env.JWT_REFRESH_EXPIRES_IN || "30d";
 
 export function generateAccessToken(payload: TokenPayload): string {
   const options: SignOptions = {
-    expiresIn: getAccessExpiresIn() as any,
+    expiresIn: process.env.JWT_ACCESS_EXPIRES_IN as any,
   };
-  return jwt.sign(payload, getAccessSecret(), options);
+  return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, options);
 }
 
 export function generateRefreshToken(payload: TokenPayload): string {
   const options: SignOptions = {
-    expiresIn: getRefreshExpiresIn() as any,
+    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN as any,
   };
-  return jwt.sign(payload, getRefreshSecret(), options);
+  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, options);
 }
 
 export function verifyAccessToken(token: string): TokenPayload {
-  const decoded = jwt.verify(token, getAccessSecret()) as TokenPayload;
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_ACCESS_SECRET!,
+  ) as TokenPayload;
   return {
     userId: decoded.userId,
     email: decoded.email,
@@ -36,7 +28,10 @@ export function verifyAccessToken(token: string): TokenPayload {
 }
 
 export function verifyRefreshToken(token: string): TokenPayload {
-  const decoded = jwt.verify(token, getRefreshSecret()) as TokenPayload;
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_REFRESH_SECRET!,
+  ) as TokenPayload;
   return {
     userId: decoded.userId,
     email: decoded.email,

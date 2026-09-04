@@ -1,12 +1,21 @@
 import http from "http";
 
 import app from "@/app";
+import { checkDatabaseConnection } from "@/db";
 import logger from "@/lib/logger";
 
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 const startServer = async () => {
+  try {
+    await checkDatabaseConnection();
+    logger.info("Database connected successfully");
+  } catch (error) {
+    logger.error("Failed to connect to the database", { error });
+    process.exit(1);
+  }
+
   server.listen(PORT, () => {
     logger.info("Server is running on port ", { port: PORT });
   });

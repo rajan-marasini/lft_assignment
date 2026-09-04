@@ -1,5 +1,7 @@
 import knex, { type Knex } from "knex";
 
+import logger from "@/lib/logger";
+
 const DEFAULT_POOL_MIN = 2;
 const DEFAULT_POOL_MAX = 10;
 
@@ -23,7 +25,7 @@ export function createDatabase(
 ): Knex {
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL is required. Copy .env.example to .env and provide a PostgreSQL connection string.",
+      "DATABASE_URL is required. Provide the database connection string and try again.",
     );
   }
 
@@ -56,6 +58,12 @@ export function createDatabase(
 }
 
 export const db = createDatabase();
+
+db.on("query", (queryData) => {
+  logger.debug(`SQL Query: ${queryData.sql};`, {
+    bindings: queryData.bindings,
+  });
+});
 
 export async function checkDatabaseConnection(): Promise<void> {
   await db.raw("select 1");

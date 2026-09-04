@@ -1,4 +1,5 @@
 import type { CookieOptions, NextFunction, Request, Response } from "express";
+
 import db from "@/db";
 import { AppError } from "@/lib/errors";
 import {
