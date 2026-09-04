@@ -1,0 +1,32 @@
+{
+  "name": "assign",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/server.ts",
+    "dev": "bun run --watch src/server.ts",
+    "build": "bun build ./src/server.ts --outdir ./dist --target bun --external knex --external pg",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "bun run src/db/migrate.ts latest",
+    "db:rollback": "bun run src/db/migrate.ts rollback"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^26.4.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "knex": "^3.3.0",
+    "morgan": "^1.12.0",
+    "pg": "^8.23.0",
+    "winston": "^3.19.0"
+  }
+}
