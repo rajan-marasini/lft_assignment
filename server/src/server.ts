@@ -18,6 +18,7 @@ const startServer = async () => {
 
   server.listen(PORT, () => {
     logger.info("Server is running on port ", { port: PORT });
+    logger.info("Docs available at /docs");
   });
 };
 
