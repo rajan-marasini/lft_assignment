@@ -50,16 +50,8 @@ export const getEventsQuerySchema = z.object({
   search: z.string().trim().optional(),
   sortBy: z.enum(["starts_at", "created_at", "title"]).optional().default("starts_at"),
   sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
-  page: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseInt(val, 10) : 1))
-    .pipe(z.number().min(1)),
-  limit: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseInt(val, 10) : 10))
-    .pipe(z.number().min(1).max(100)),
+  page: z.coerce.number().min(1).optional().default(1),
+  limit: z.coerce.number().min(1).max(100).optional().default(10),
 });
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;

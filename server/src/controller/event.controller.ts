@@ -36,7 +36,11 @@ async function attachTagsToEvents(events: EventRow[]) {
   const eventTags = await db("event_tags")
     .join("tags", "event_tags.tag_id", "tags.id")
     .whereIn("event_tags.event_id", eventIds)
-    .select("event_tags.event_id", "tags.id as tag_id", "tags.name as tag_name");
+    .select(
+      "event_tags.event_id",
+      "tags.id as tag_id",
+      "tags.name as tag_name",
+    );
 
   const tagsByEventId: Record<string, { id: string; name: string }[]> = {};
   for (const row of eventTags) {
@@ -158,7 +162,7 @@ export const CreateEvent = TryCatch(
 
 export const GetEvents = TryCatch(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const queryInput = (req.query as unknown) as GetEventsQueryInput;
+    const queryInput = req.query as unknown as GetEventsQueryInput;
     const {
       status = "all",
       visibility = "all",
@@ -239,24 +243,23 @@ export const GetEvents = TryCatch(
     }
 
     // Count query for total items
-    const countQuery = db("events")
-      .andWhere((builder) => {
-        if (currentUserId) {
-          if (visibility === "public") {
-            builder.where("events.visibility", "public");
-          } else if (visibility === "private") {
-            builder
-              .where("events.visibility", "private")
-              .andWhere("events.creator_id", currentUserId);
-          } else {
-            builder
-              .where("events.visibility", "public")
-              .orWhere("events.creator_id", currentUserId);
-          }
-        } else {
+    const countQuery = db("events").andWhere((builder) => {
+      if (currentUserId) {
+        if (visibility === "public") {
           builder.where("events.visibility", "public");
+        } else if (visibility === "private") {
+          builder
+            .where("events.visibility", "private")
+            .andWhere("events.creator_id", currentUserId);
+        } else {
+          builder
+            .where("events.visibility", "public")
+            .orWhere("events.creator_id", currentUserId);
         }
-      });
+      } else {
+        builder.where("events.visibility", "public");
+      }
+    });
 
     if (status === "upcoming") {
       countQuery.andWhere("events.starts_at", ">=", now);
@@ -284,7 +287,9 @@ export const GetEvents = TryCatch(
       });
     }
 
-    const countResult = await countQuery.count<{ count: string }>("id as count").first();
+    const countResult = await countQuery
+      .count<{ count: string }>("id as count")
+      .first();
     const totalItems = parseInt(countResult?.count || "0", 10);
 
     // Apply sorting & pagination
@@ -469,19 +474,6 @@ export const DeleteEvent = TryCatch(
     res.status(200).json({
       success: true,
       message: "Event deleted successfully",
-    });
-  },
-);
-
-export const GetAllTags = TryCatch(
-  async (_req: Request, res: Response, _next: NextFunction) => {
-    const tags: TagRow[] = await db("tags").select("id", "name").orderBy("name", "asc");
-
-    res.status(200).json({
-      success: true,
-      data: {
-        tags,
-      },
     });
   },
 );

@@ -1,3 +1,5 @@
+import express from "express";
+
 import * as eventController from "@/controller/event.controller";
 import { isAuthenticated } from "@/middleware/auth.middleware";
 import { validate, validateQuery } from "@/middleware/validate.middleware";
@@ -6,12 +8,8 @@ import {
   getEventsQuerySchema,
   updateEventSchema,
 } from "@/schemas/event.schema";
-import express from "express";
 
 const router = express.Router();
-
-// GET /api/events/tags - Fetch all tags
-router.get("/tags", eventController.GetAllTags);
 
 // POST /api/events - Create new event (authenticated users only)
 router.post(

@@ -29,8 +29,11 @@ export const validateQuery = (schema: ZodType) => {
       return next(new AppError(errorMessage, 400));
     }
 
-    req.query = result.data as Record<string, any>;
+    for (const key of Object.keys(req.query)) {
+      delete req.query[key];
+    }
+    Object.assign(req.query, result.data);
+
     next();
   };
 };
-
