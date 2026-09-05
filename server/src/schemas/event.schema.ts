@@ -36,23 +36,57 @@ export const createEventSchema = z.object({
 
 export const updateEventSchema = createEventSchema.partial();
 
-export const getEventsQuerySchema = z.object({
-  status: z.enum(["upcoming", "past", "all"]).optional().default("all"),
-  visibility: z.enum(["public", "private", "all"]).optional().default("all"),
-  tag: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .transform((val) => {
-      if (!val) return [];
-      if (Array.isArray(val)) return val.map((t) => t.trim().toLowerCase());
-      return [val.trim().toLowerCase()];
-    }),
-  search: z.string().trim().optional(),
-  sortBy: z.enum(["starts_at", "created_at", "title"]).optional().default("starts_at"),
-  sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
-  page: z.coerce.number().min(1).optional().default(1),
-  limit: z.coerce.number().min(1).max(100).optional().default(10),
-});
+export const getEventsQuerySchema = z
+  .object({
+    status: z.enum(["upcoming", "past", "all"]).optional().default("all"),
+    visibility: z.enum(["public", "private", "all"]).optional().default("all"),
+    tag: z
+      .union([z.string(), z.array(z.string()), z.record(z.string(), z.string())])
+      .optional(),
+    "tag[]": z
+      .union([z.string(), z.array(z.string()), z.record(z.string(), z.string())])
+      .optional(),
+    search: z.string().trim().optional(),
+    sortBy: z
+      .enum(["starts_at", "created_at", "title"])
+      .optional()
+      .default("starts_at"),
+    sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),
+    page: z.coerce.number().min(1).optional().default(1),
+    limit: z.coerce.number().min(1).max(100).optional().default(10),
+  })
+  .transform((data) => {
+    const rawTag = data.tag ?? data["tag[]"];
+    let tags: string[] = [];
+
+    if (typeof rawTag === "string") {
+      tags = rawTag
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
+    } else if (Array.isArray(rawTag)) {
+      tags = rawTag
+        .flatMap((t) => t.split(","))
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
+    } else if (rawTag && typeof rawTag === "object") {
+      tags = Object.values(rawTag)
+        .flatMap((t) => (typeof t === "string" ? t.split(",") : []))
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
+    }
+
+    return {
+      status: data.status,
+      visibility: data.visibility,
+      tag: tags,
+      search: data.search,
+      sortBy: data.sortBy,
+      sortOrder: data.sortOrder,
+      page: data.page,
+      limit: data.limit,
+    };
+  });
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

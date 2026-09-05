@@ -29,6 +29,21 @@ export interface EventPagination {
   totalPages: number;
 }
 
+export interface CreateEventPayload {
+  title: string;
+  description: string;
+  starts_at: string;
+  location: string;
+  visibility: "public" | "private";
+  tags?: string[];
+}
+
+export type UpdateEventPayload = Partial<CreateEventPayload>;
+
+export interface SingleEventResponse {
+  event: Event;
+}
+
 export interface GetEventsResponse {
   events: Event[];
   pagination: EventPagination;
@@ -44,3 +59,4 @@ export interface GetEventsParams {
   sortOrder?: "asc" | "desc";
   tag?: string[];
 }
+

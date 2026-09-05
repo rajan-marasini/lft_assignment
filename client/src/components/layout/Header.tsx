@@ -82,10 +82,21 @@ export const Header = () => {
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     id="dropdown-create-event"
-                    className="cursor-pointer gap-2.5"
+                    className="cursor-pointer p-0"
                   >
-                    <Plus className="h-4 w-4 text-stone-500 shrink-0" />
-                    Create Event
+                    <Link to="/events/create" className="flex items-center gap-2.5 w-full px-2 py-1.5">
+                      <Plus className="h-4 w-4 text-stone-500 shrink-0" />
+                      Create Event
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    id="dropdown-my-events"
+                    className="cursor-pointer p-0"
+                  >
+                    <Link to="/my-events" className="flex items-center gap-2.5 w-full px-2 py-1.5">
+                      <CalendarDays className="h-4 w-4 text-stone-500 shrink-0" />
+                      My Events
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
 

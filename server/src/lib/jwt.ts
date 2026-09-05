@@ -4,14 +4,14 @@ import type { TokenPayload } from "@/types/express";
 
 export function generateAccessToken(payload: TokenPayload): string {
   const options: SignOptions = {
-    expiresIn: process.env.JWT_ACCESS_EXPIRES_IN as any,
+    expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || "15m") as SignOptions["expiresIn"],
   };
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, options);
 }
 
 export function generateRefreshToken(payload: TokenPayload): string {
   const options: SignOptions = {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN as any,
+    expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || "7d") as SignOptions["expiresIn"],
   };
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, options);
 }

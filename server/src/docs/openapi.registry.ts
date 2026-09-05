@@ -38,7 +38,7 @@ const ErrorResponseSchema = registry.register(
   z.object({
     success: z.boolean().default(false),
     message: z.string(),
-    errors: z.array(z.any()).optional(),
+    errors: z.array(z.unknown()).optional(),
   }),
 );
 

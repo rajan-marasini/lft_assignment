@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import type { Knex } from "knex";
 
 import db from "@/db";
 import { AppError } from "@/lib/errors";
@@ -68,7 +69,10 @@ async function attachTagsToEvents(events: EventRow[]) {
   }));
 }
 
-async function processTags(trx: any, tagNames: string[]): Promise<string[]> {
+async function processTags(
+  trx: Knex.Transaction,
+  tagNames: string[]
+): Promise<string[]> {
   if (!tagNames || tagNames.length === 0) return [];
 
   const uniqueTagNames = Array.from(
@@ -396,7 +400,7 @@ export const UpdateEvent = TryCatch(
     }
 
     await db.transaction(async (trx) => {
-      const updateData: Record<string, any> = {};
+      const updateData: Record<string, unknown> = {};
       if (title !== undefined) updateData.title = title;
       if (description !== undefined) updateData.description = description;
       if (starts_at !== undefined) updateData.starts_at = new Date(starts_at);

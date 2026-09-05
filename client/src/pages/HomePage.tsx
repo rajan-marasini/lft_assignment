@@ -5,13 +5,14 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { EventCard, EventCardSkeleton } from "@/components/events/EventCard";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useGetEvents } from "@/hooks/useEvents";
+import { useGetAllTags } from "@/hooks/useTags";
 import type { GetEventsParams } from "@/types/event.types";
 
 const EVENTS_PER_PAGE = 6;
@@ -26,11 +27,13 @@ type StatusFilter = "all" | "upcoming" | "past";
 
 export const HomePage = () => {
   const { data: user } = useCurrentUser();
+  const { data: tagsData } = useGetAllTags();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("upcoming");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Debounce search
   useEffect(() => {
@@ -41,6 +44,16 @@ export const HomePage = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  const toggleTagFilter = (tag: string) => {
+    const normalized = tag.toLowerCase();
+    setSelectedTags((prev) =>
+      prev.includes(normalized)
+        ? prev.filter((t) => t !== normalized)
+        : [...prev, normalized]
+    );
+    setPage(1);
+  };
+
   const queryParams: GetEventsParams = {
     page,
     limit: EVENTS_PER_PAGE,
@@ -49,7 +62,9 @@ export const HomePage = () => {
     sortBy: "starts_at",
     sortOrder: statusFilter === "past" ? "desc" : "asc",
     ...(search ? { search } : {}),
+    ...(selectedTags.length > 0 ? { tag: selectedTags } : {}),
   };
+
 
   const { data, isFetching, isError } = useGetEvents(queryParams);
 
@@ -57,6 +72,16 @@ export const HomePage = () => {
   const pagination = data?.data?.pagination;
   const totalPages = pagination?.totalPages ?? 1;
   const totalItems = pagination?.totalItems ?? 0;
+
+  // Extract dynamic tags from backend DB tags and events currently loaded
+  const displayTags = useMemo(() => {
+    const dbTags = tagsData?.data?.tags.map((t) => t.name) || [];
+    const eventTags = events.flatMap((e) => e.tags?.map((t) => t.name) || []);
+    const unique = Array.from(
+      new Set([...dbTags, ...eventTags, ...selectedTags])
+    ).filter(Boolean);
+    return unique;
+  }, [tagsData, events, selectedTags]);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -198,6 +223,41 @@ export const HomePage = () => {
               : ""}
           </p>
         </div>
+
+        {/* Dynamic Tag Filters Row */}
+        {displayTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-6 text-sm">
+            <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider mr-1">
+              Filter by tag:
+            </span>
+            {displayTags.map((tag) => {
+              const isSelected = selectedTags.includes(tag.toLowerCase());
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTagFilter(tag)}
+                  className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
+                    isSelected
+                      ? "bg-amber-600 text-white shadow-xs"
+                      : "bg-stone-100 text-stone-600 hover:bg-stone-200 border border-stone-200"
+                  }`}
+                >
+                  #{tag}
+                </button>
+              );
+            })}
+            {selectedTags.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedTags([])}
+                className="text-xs text-stone-400 hover:text-stone-700 underline ml-2"
+              >
+                Reset tags
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Active search badge */}
         {search && (
