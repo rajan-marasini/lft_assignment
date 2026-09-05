@@ -29,19 +29,54 @@ interface TagRow {
   name: string;
 }
 
-async function attachTagsToEvents(events: EventRow[]) {
+async function attachMetadataToEvents(
+  events: EventRow[],
+  currentUserId?: string,
+) {
   if (events.length === 0) return [];
 
   const eventIds = events.map((e) => e.id);
 
-  const eventTags = await db("event_tags")
-    .join("tags", "event_tags.tag_id", "tags.id")
-    .whereIn("event_tags.event_id", eventIds)
-    .select(
-      "event_tags.event_id",
-      "tags.id as tag_id",
-      "tags.name as tag_name",
-    );
+  let eventTags: any[] = [];
+  let rsvpCountsRaw: any[] = [];
+  let userRsvps: any[] = [];
+
+  try {
+    eventTags = await db("event_tags")
+      .join("tags", "event_tags.tag_id", "tags.id")
+      .whereIn("event_tags.event_id", eventIds)
+      .select(
+        "event_tags.event_id",
+        "tags.id as tag_id",
+        "tags.name as tag_name",
+      );
+  } catch {
+    eventTags = [];
+  }
+
+  try {
+    [rsvpCountsRaw, userRsvps] = await Promise.all([
+      db("rsvps")
+        .whereIn("event_id", eventIds)
+        .select(
+          "event_id",
+          db.raw("COUNT(CASE WHEN status = 'yes' THEN 1 END)::int as yes"),
+          db.raw("COUNT(CASE WHEN status = 'no' THEN 1 END)::int as no"),
+          db.raw("COUNT(CASE WHEN status = 'maybe' THEN 1 END)::int as maybe"),
+          db.raw("COUNT(*)::int as total"),
+        )
+        .groupBy("event_id"),
+      currentUserId
+        ? db("rsvps")
+            .whereIn("event_id", eventIds)
+            .where("user_id", currentUserId)
+            .select("event_id", "status")
+        : Promise.resolve([]),
+    ]);
+  } catch {
+    rsvpCountsRaw = [];
+    userRsvps = [];
+  }
 
   const tagsByEventId: Record<string, { id: string; name: string }[]> = {};
   for (const row of eventTags) {
@@ -49,6 +84,24 @@ async function attachTagsToEvents(events: EventRow[]) {
       tagsByEventId[row.event_id] = [];
     }
     tagsByEventId[row.event_id]!.push({ id: row.tag_id, name: row.tag_name });
+  }
+
+  const rsvpByEventId: Record<
+    string,
+    { yes: number; no: number; maybe: number; total: number }
+  > = {};
+  for (const row of rsvpCountsRaw) {
+    rsvpByEventId[row.event_id] = {
+      yes: Number(row.yes || 0),
+      no: Number(row.no || 0),
+      maybe: Number(row.maybe || 0),
+      total: Number(row.total || 0),
+    };
+  }
+
+  const userStatusByEventId: Record<string, "yes" | "no" | "maybe"> = {};
+  for (const row of userRsvps) {
+    userStatusByEventId[row.event_id] = row.status as "yes" | "no" | "maybe";
   }
 
   return events.map((event) => ({
@@ -66,6 +119,10 @@ async function attachTagsToEvents(events: EventRow[]) {
       email: event.creator_email,
     },
     tags: tagsByEventId[event.id] || [],
+    rsvp: {
+      counts: rsvpByEventId[event.id] || { yes: 0, no: 0, maybe: 0, total: 0 },
+      currentUserStatus: userStatusByEventId[event.id] || null,
+    },
   }));
 }
 
@@ -136,14 +193,17 @@ export const CreateEvent = TryCatch(
       return newEvent;
     });
 
-    const [formattedEvent] = await attachTagsToEvents([
-      {
-        ...event,
-        creator_id: req.user.userId,
-        creator_name: "",
-        creator_email: req.user.email,
-      },
-    ]);
+    const [formattedEvent] = await attachMetadataToEvents(
+      [
+        {
+          ...event,
+          creator_id: req.user.userId,
+          creator_name: "",
+          creator_email: req.user.email,
+        },
+      ],
+      req.user.userId,
+    );
 
     const creator = await db("users")
       .where({ id: req.user.userId })
@@ -297,20 +357,35 @@ export const GetEvents = TryCatch(
     const totalItems = parseInt(countResult?.count || "0", 10);
 
     // Apply sorting & pagination
-    const validSortColumns: Record<string, string> = {
-      starts_at: "events.starts_at",
-      created_at: "events.created_at",
-      title: "events.title",
-    };
-    const sortColumn = validSortColumns[sortBy] || "events.starts_at";
     const offset = (page - 1) * limit;
 
+    if (sortBy === "popularity") {
+      baseQuery
+        .select(
+          db.raw(
+            "(SELECT COUNT(*)::int FROM rsvps WHERE rsvps.event_id = events.id AND rsvps.status = 'yes') as popularity_count",
+          ),
+        )
+        .orderBy("popularity_count", sortOrder)
+        .orderBy("events.starts_at", "asc");
+    } else {
+      const validSortColumns: Record<string, string> = {
+        starts_at: "events.starts_at",
+        created_at: "events.created_at",
+        title: "events.title",
+      };
+      const sortColumn = validSortColumns[sortBy] || "events.starts_at";
+      baseQuery.orderBy(sortColumn, sortOrder);
+    }
+
     const eventsRows: EventRow[] = await baseQuery
-      .orderBy(sortColumn, sortOrder)
       .limit(limit)
       .offset(offset);
 
-    const formattedEvents = await attachTagsToEvents(eventsRows);
+    const formattedEvents = await attachMetadataToEvents(
+      eventsRows,
+      currentUserId,
+    );
     const totalPages = Math.ceil(totalItems / limit) || 1;
 
     res.status(200).json({
@@ -362,7 +437,10 @@ export const GetEventById = TryCatch(
       throw new AppError("You do not have permission to view this event", 403);
     }
 
-    const [formattedEvent] = await attachTagsToEvents([eventRow]);
+    const [formattedEvent] = await attachMetadataToEvents(
+      [eventRow],
+      req.user?.userId,
+    );
 
     res.status(200).json({
       success: true,
@@ -443,7 +521,10 @@ export const UpdateEvent = TryCatch(
       )
       .first();
 
-    const [formattedEvent] = await attachTagsToEvents([updatedEventRow]);
+    const [formattedEvent] = await attachMetadataToEvents(
+      [updatedEventRow],
+      req.user.userId,
+    );
 
     res.status(200).json({
       success: true,

@@ -106,13 +106,23 @@ export const EventCard = ({ event }: EventCardProps) => {
           )}
 
           {/* Footer row */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-auto pt-0.5">
-            {event.location && (
-              <span className="flex items-center gap-1 text-xs text-stone-400">
-                <MapPin className="h-3 w-3 shrink-0 text-stone-400" />
-                {event.location}
-              </span>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-auto pt-1 border-t border-stone-100">
+            <div className="flex items-center gap-3">
+              {event.location && (
+                <span className="flex items-center gap-1 text-xs text-stone-500">
+                  <MapPin className="h-3 w-3 shrink-0 text-stone-400" />
+                  {event.location}
+                </span>
+              )}
+              {event.rsvp && (
+                <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50/80 px-2 py-0.5 rounded border border-emerald-100">
+                  <User className="h-3 w-3 text-emerald-600" />
+                  {event.rsvp.counts.yes} going
+                  {event.rsvp.counts.maybe > 0 && ` (${event.rsvp.counts.maybe} maybe)`}
+                </span>
+              )}
+            </div>
+
             {event.tags.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 {event.tags.slice(0, 4).map((tag) => (

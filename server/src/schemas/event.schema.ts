@@ -48,7 +48,7 @@ export const getEventsQuerySchema = z
       .optional(),
     search: z.string().trim().optional(),
     sortBy: z
-      .enum(["starts_at", "created_at", "title"])
+      .enum(["starts_at", "created_at", "title", "popularity"])
       .optional()
       .default("starts_at"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("asc"),

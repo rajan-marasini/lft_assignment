@@ -15,6 +15,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { DeleteEventDialog } from "@/components/events/DeleteEventDialog";
+import { RsvpSelector } from "@/components/events/RsvpSelector";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -210,6 +211,15 @@ export const EventDetailPage = () => {
 
           <Separator />
 
+          {/* RSVP Selector */}
+          <RsvpSelector
+            eventId={event.id}
+            currentStatus={event.rsvp?.currentUserStatus ?? null}
+            counts={event.rsvp?.counts}
+          />
+
+          <Separator />
+
           {/* Tags */}
           {event.tags && event.tags.length > 0 && (
             <div className="space-y-2">
@@ -233,7 +243,7 @@ export const EventDetailPage = () => {
 
           {/* Rich Text Description */}
           <div className="space-y-2">
-            <h3 className="text-2xl font-semibold uppercase tracking-wider ">
+            <h3 className="text-xl font-semibold tracking-tight text-foreground">
               About This Event
             </h3>
             <div

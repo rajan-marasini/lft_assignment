@@ -1,3 +1,24 @@
+export type RsvpStatus = "yes" | "no" | "maybe";
+
+export interface RsvpCounts {
+  yes: number;
+  no: number;
+  maybe: number;
+  total: number;
+}
+
+export interface RsvpAttendee {
+  id: string;
+  name: string;
+  status: "yes" | "maybe";
+}
+
+export interface RsvpSummary {
+  counts: RsvpCounts;
+  currentUserStatus: RsvpStatus | null;
+  attendees?: RsvpAttendee[];
+}
+
 export interface EventTag {
   id: string;
   name: string;
@@ -20,6 +41,10 @@ export interface Event {
   updated_at: string;
   creator: EventCreator;
   tags: EventTag[];
+  rsvp?: {
+    counts: RsvpCounts;
+    currentUserStatus: RsvpStatus | null;
+  };
 }
 
 export interface EventPagination {
@@ -55,8 +80,11 @@ export interface GetEventsParams {
   search?: string;
   status?: "all" | "upcoming" | "past";
   visibility?: "all" | "public" | "private";
-  sortBy?: "starts_at" | "created_at" | "title";
+  sortBy?: "starts_at" | "created_at" | "title" | "popularity";
   sortOrder?: "asc" | "desc";
   tag?: string[];
 }
 
+export interface RsvpResponse {
+  rsvp: RsvpSummary;
+}

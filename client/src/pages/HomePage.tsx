@@ -42,9 +42,9 @@ export const HomePage = () => {
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 400);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("upcoming");
-  const [sortBy, setSortBy] = useState<"created_at" | "starts_at">(
-    "created_at",
-  );
+  const [sortBy, setSortBy] = useState<
+    "created_at" | "starts_at" | "popularity"
+  >("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -250,7 +250,13 @@ export const HomePage = () => {
               Sort by:
             </label>
             <Select
-              value={sortBy === "starts_at" ? `${sortBy}_${sortOrder}` : ""}
+              value={
+                sortBy === "popularity"
+                  ? "popularity_desc"
+                  : sortBy === "starts_at"
+                    ? `${sortBy}_${sortOrder}`
+                    : "default"
+              }
               onValueChange={(val) => {
                 if (val === "starts_at_asc") {
                   setSortBy("starts_at");
@@ -258,31 +264,43 @@ export const HomePage = () => {
                 } else if (val === "starts_at_desc") {
                   setSortBy("starts_at");
                   setSortOrder("desc");
+                } else if (val === "popularity_desc") {
+                  setSortBy("popularity");
+                  setSortOrder("desc");
+                } else {
+                  setSortBy("created_at");
+                  setSortOrder("desc");
                 }
                 setPage(1);
               }}
             >
               <SelectTrigger
                 id="date-sort-trigger"
-                className="h-9 w-42.5 bg-white border-stone-300 text-stone-800 text-sm font-medium focus:ring-0"
+                className="h-9 w-48 bg-white border-stone-300 text-stone-800 text-sm font-medium focus:ring-0"
               >
                 <div className="flex items-center gap-1.5 truncate">
                   <ArrowUpDown className="h-3.5 w-3.5 text-stone-500 shrink-0" />
                   <SelectValue placeholder="Default">
-                    {sortBy === "starts_at"
-                      ? sortOrder === "asc"
-                        ? "Date: Earliest First"
-                        : "Date: Latest First"
-                      : "Default"}
+                    {sortBy === "popularity"
+                      ? "Popularity: Most RSVPs"
+                      : sortBy === "starts_at"
+                        ? sortOrder === "asc"
+                          ? "Date: Earliest First"
+                          : "Date: Latest First"
+                        : "Default"}
                   </SelectValue>
                 </div>
               </SelectTrigger>
               <SelectContent align="end">
+                <SelectItem value="default">Default</SelectItem>
                 <SelectItem value="starts_at_asc">
                   Date: Earliest First
                 </SelectItem>
                 <SelectItem value="starts_at_desc">
                   Date: Latest First
+                </SelectItem>
+                <SelectItem value="popularity_desc">
+                  Popularity: Most RSVPs
                 </SelectItem>
               </SelectContent>
             </Select>
