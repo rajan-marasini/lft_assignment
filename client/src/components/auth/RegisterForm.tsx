@@ -1,8 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
-import { Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,13 +56,18 @@ export const RegisterForm = () => {
           />
         </div>
         {errors.name && (
-          <p className="text-xs text-destructive font-medium">{errors.name.message}</p>
+          <p className="text-xs text-destructive font-medium">
+            {errors.name.message}
+          </p>
         )}
       </div>
 
       {/* Email Address */}
       <div className="space-y-1.5">
-        <Label htmlFor="email" className="text-xs font-semibold text-foreground">
+        <Label
+          htmlFor="email"
+          className="text-xs font-semibold text-foreground"
+        >
           Email Address
         </Label>
         <div className="relative">
@@ -77,13 +82,18 @@ export const RegisterForm = () => {
           />
         </div>
         {errors.email && (
-          <p className="text-xs text-destructive font-medium">{errors.email.message}</p>
+          <p className="text-xs text-destructive font-medium">
+            {errors.email.message}
+          </p>
         )}
       </div>
 
       {/* Password */}
       <div className="space-y-1.5">
-        <Label htmlFor="password" className="text-xs font-semibold text-foreground">
+        <Label
+          htmlFor="password"
+          className="text-xs font-semibold text-foreground"
+        >
           Password
         </Label>
         <div className="relative">
@@ -102,7 +112,11 @@ export const RegisterForm = () => {
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             tabIndex={-1}
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
         {errors.password && (
@@ -114,7 +128,10 @@ export const RegisterForm = () => {
 
       {/* Confirm Password */}
       <div className="space-y-1.5">
-        <Label htmlFor="confirmPassword" className="text-xs font-semibold text-foreground">
+        <Label
+          htmlFor="confirmPassword"
+          className="text-xs font-semibold text-foreground"
+        >
           Confirm Password
         </Label>
         <div className="relative">
@@ -133,7 +150,11 @@ export const RegisterForm = () => {
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             tabIndex={-1}
           >
-            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showConfirmPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
         {errors.confirmPassword && (
@@ -146,7 +167,7 @@ export const RegisterForm = () => {
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 font-medium h-10 shadow-sm transition-colors mt-3"
+        className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 font-medium h-10 shadow-sm transition-colors mt-3 rounded-none"
         disabled={isPending}
       >
         {isPending ? (

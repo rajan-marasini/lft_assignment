@@ -144,7 +144,7 @@ export const RichTextEditor = ({
           <Redo className="h-4 w-4" />
         </Button>
 
-        <div className="w-[1px] h-5 bg-border mx-1" />
+        <div className="w-px h-5 bg-border mx-1" />
 
         {/* Heading Dropdown */}
         <DropdownMenu>
@@ -157,29 +157,47 @@ export const RichTextEditor = ({
               {editor.isActive("heading", { level: 1 })
                 ? "H1"
                 : editor.isActive("heading", { level: 2 })
-                ? "H2"
-                : editor.isActive("heading", { level: 3 })
-                ? "H3"
-                : editor.isActive("heading", { level: 4 })
-                ? "H4"
-                : "Paragraph"}
+                  ? "H2"
+                  : editor.isActive("heading", { level: 3 })
+                    ? "H3"
+                    : editor.isActive("heading", { level: 4 })
+                      ? "H4"
+                      : "Paragraph"}
             </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => editor.chain().focus().setParagraph().run()}>
+              <DropdownMenuItem
+                onClick={() => editor.chain().focus().setParagraph().run()}
+              >
                 Paragraph
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
+              <DropdownMenuItem
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 1 }).run()
+                }
+              >
                 Heading 1 (H1)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
+              <DropdownMenuItem
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 2 }).run()
+                }
+              >
                 Heading 2 (H2)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
+              <DropdownMenuItem
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 3 }).run()
+                }
+              >
                 Heading 3 (H3)
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}>
+              <DropdownMenuItem
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 4 }).run()
+                }
+              >
                 Heading 4 (H4)
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -236,7 +254,7 @@ export const RichTextEditor = ({
           <Quote className="h-4 w-4" />
         </Button>
 
-        <div className="w-[1px] h-5 bg-border mx-1" />
+        <div className="w-px h-5 bg-border mx-1" />
 
         {/* Formatting Group: Bold, Italic, Strikethrough, Code, Underline, Highlight, Link */}
         <Button
@@ -343,7 +361,7 @@ export const RichTextEditor = ({
           </Button>
         )}
 
-        <div className="w-[1px] h-5 bg-border mx-1" />
+        <div className="w-px h-5 bg-border mx-1" />
 
         {/* Superscript / Subscript */}
         <Button
@@ -369,12 +387,14 @@ export const RichTextEditor = ({
           <SubscriptIcon className="h-4 w-4" />
         </Button>
 
-        <div className="w-[1px] h-5 bg-border mx-1" />
+        <div className="w-px h-5 bg-border mx-1" />
 
         {/* Text Alignment */}
         <Button
           type="button"
-          variant={editor.isActive({ textAlign: "left" }) ? "secondary" : "ghost"}
+          variant={
+            editor.isActive({ textAlign: "left" }) ? "secondary" : "ghost"
+          }
           size="sm"
           className="h-8 w-8 p-0"
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
@@ -385,7 +405,9 @@ export const RichTextEditor = ({
         </Button>
         <Button
           type="button"
-          variant={editor.isActive({ textAlign: "center" }) ? "secondary" : "ghost"}
+          variant={
+            editor.isActive({ textAlign: "center" }) ? "secondary" : "ghost"
+          }
           size="sm"
           className="h-8 w-8 p-0"
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
@@ -396,7 +418,9 @@ export const RichTextEditor = ({
         </Button>
         <Button
           type="button"
-          variant={editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"}
+          variant={
+            editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"
+          }
           size="sm"
           className="h-8 w-8 p-0"
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
@@ -407,7 +431,9 @@ export const RichTextEditor = ({
         </Button>
         <Button
           type="button"
-          variant={editor.isActive({ textAlign: "justify" }) ? "secondary" : "ghost"}
+          variant={
+            editor.isActive({ textAlign: "justify" }) ? "secondary" : "ghost"
+          }
           size="sm"
           className="h-8 w-8 p-0"
           onClick={() => editor.chain().focus().setTextAlign("justify").run()}
@@ -423,7 +449,9 @@ export const RichTextEditor = ({
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 text-muted-foreground ml-auto"
-          onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
+          onClick={() =>
+            editor.chain().focus().clearNodes().unsetAllMarks().run()
+          }
           disabled={disabled}
           title="Clear Formatting"
         >
@@ -432,7 +460,7 @@ export const RichTextEditor = ({
       </div>
 
       {/* Editor Content Area (Resizable) */}
-      <div className="p-3 min-h-[160px] h-[220px] resize-y overflow-auto prose prose-sm dark:prose-invert max-w-none">
+      <div className="p-3 min-h-40 h-55 resize-y overflow-auto prose prose-sm dark:prose-invert max-w-none">
         <EditorContent editor={editor} className="h-full" />
       </div>
     </div>

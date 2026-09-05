@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import { useAuthStore } from "@/stores/use-auth-store";
 
 export const API_BASE_URL =
@@ -25,7 +26,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 apiClient.interceptors.response.use(
@@ -44,7 +45,7 @@ apiClient.interceptors.response.use(
         const res = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
           {},
-          { withCredentials: true }
+          { withCredentials: true },
         );
         const newAccessToken =
           res.data?.data?.accessToken || res.data?.data?.access_token;
@@ -61,5 +62,5 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );

@@ -1,8 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,10 @@ export const LoginForm = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Email Field */}
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-xs font-semibold text-foreground">
+        <Label
+          htmlFor="email"
+          className="text-xs font-semibold text-foreground"
+        >
           Email Address
         </Label>
         <div className="relative">
@@ -49,14 +52,19 @@ export const LoginForm = () => {
           />
         </div>
         {errors.email && (
-          <p className="text-xs text-destructive font-medium">{errors.email.message}</p>
+          <p className="text-xs text-destructive font-medium">
+            {errors.email.message}
+          </p>
         )}
       </div>
 
       {/* Password Field */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-xs font-semibold text-foreground">
+          <Label
+            htmlFor="password"
+            className="text-xs font-semibold text-foreground"
+          >
             Password
           </Label>
         </div>
@@ -76,7 +84,11 @@ export const LoginForm = () => {
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             tabIndex={-1}
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
         {errors.password && (
@@ -89,7 +101,7 @@ export const LoginForm = () => {
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 font-medium h-10 shadow-sm transition-colors mt-2"
+        className="w-full bg-zinc-900 hover:bg-zinc-800 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 font-medium h-10 shadow-sm transition-colors mt-2 rounded-none"
         disabled={isPending}
       >
         {isPending ? (

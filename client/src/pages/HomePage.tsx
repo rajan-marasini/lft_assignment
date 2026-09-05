@@ -1,4 +1,5 @@
 import {
+  ArrowUpDown,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -10,7 +11,15 @@ import { Link } from "react-router";
 
 import { EventCard, EventCardSkeleton } from "@/components/events/EventCard";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCurrentUser } from "@/hooks/useAuth";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useGetEvents } from "@/hooks/useEvents";
 import { useGetAllTags } from "@/hooks/useTags";
 import type { GetEventsParams } from "@/types/event.types";
@@ -31,26 +40,33 @@ export const HomePage = () => {
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 400);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("upcoming");
+  const [sortBy, setSortBy] = useState<"created_at" | "starts_at">(
+    "created_at",
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // Debounce search
+  // Reset page when debounced search term changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearch(searchInput);
+    (() => {
       setPage(1);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+    })();
+  }, [debouncedSearch]);
 
   const toggleTagFilter = (tag: string) => {
     const normalized = tag.toLowerCase();
     setSelectedTags((prev) =>
       prev.includes(normalized)
         ? prev.filter((t) => t !== normalized)
-        : [...prev, normalized]
+        : [...prev, normalized],
     );
+    setPage(1);
+  };
+
+  const handleStatusChange = (status: StatusFilter) => {
+    setStatusFilter(status);
     setPage(1);
   };
 
@@ -59,16 +75,15 @@ export const HomePage = () => {
     limit: EVENTS_PER_PAGE,
     status: statusFilter,
     visibility: user ? "all" : "public",
-    sortBy: "starts_at",
-    sortOrder: statusFilter === "past" ? "desc" : "asc",
-    ...(search ? { search } : {}),
+    sortBy,
+    sortOrder,
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
     ...(selectedTags.length > 0 ? { tag: selectedTags } : {}),
   };
 
-
   const { data, isFetching, isError } = useGetEvents(queryParams);
 
-  const events = data?.data?.events ?? [];
+  const events = useMemo(() => data?.data?.events ?? [], [data?.data?.events]);
   const pagination = data?.data?.pagination;
   const totalPages = pagination?.totalPages ?? 1;
   const totalItems = pagination?.totalItems ?? 0;
@@ -78,7 +93,7 @@ export const HomePage = () => {
     const dbTags = tagsData?.data?.tags.map((t) => t.name) || [];
     const eventTags = events.flatMap((e) => e.tags?.map((t) => t.name) || []);
     const unique = Array.from(
-      new Set([...dbTags, ...eventTags, ...selectedTags])
+      new Set([...dbTags, ...eventTags, ...selectedTags]),
     ).filter(Boolean);
     return unique;
   }, [tagsData, events, selectedTags]);
@@ -92,16 +107,26 @@ export const HomePage = () => {
     [totalPages],
   );
 
-  const handleStatusChange = (status: StatusFilter) => {
-    setStatusFilter(status);
+  const clearSearch = () => {
+    setSearchInput("");
     setPage(1);
   };
 
-  const clearSearch = () => {
+  const resetAllFilters = () => {
     setSearchInput("");
-    setSearch("");
+    setStatusFilter("upcoming");
+    setSelectedTags([]);
+    setSortBy("created_at");
+    setSortOrder("desc");
     setPage(1);
   };
+
+  const isFiltered = Boolean(
+    debouncedSearch ||
+    selectedTags.length > 0 ||
+    statusFilter !== "upcoming" ||
+    sortBy !== "created_at",
+  );
 
   const getPageNumbers = (): (number | "ellipsis")[] => {
     const pages: (number | "ellipsis")[] = [];
@@ -216,6 +241,53 @@ export const HomePage = () => {
             ))}
           </div>
 
+          {/* Date Sort Select */}
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="date-sort-trigger"
+              className="text-xs font-semibold text-stone-500 whitespace-nowrap"
+            >
+              Sort by:
+            </label>
+            <Select
+              value={sortBy === "starts_at" ? `${sortBy}_${sortOrder}` : ""}
+              onValueChange={(val) => {
+                if (val === "starts_at_asc") {
+                  setSortBy("starts_at");
+                  setSortOrder("asc");
+                } else if (val === "starts_at_desc") {
+                  setSortBy("starts_at");
+                  setSortOrder("desc");
+                }
+                setPage(1);
+              }}
+            >
+              <SelectTrigger
+                id="date-sort-trigger"
+                className="h-9 w-42.5 bg-white border-stone-300 text-stone-800 text-sm font-medium focus:ring-0"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-stone-500 shrink-0" />
+                  <SelectValue placeholder="Default">
+                    {sortBy === "starts_at"
+                      ? sortOrder === "asc"
+                        ? "Date: Earliest First"
+                        : "Date: Latest First"
+                      : "Default"}
+                  </SelectValue>
+                </div>
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="starts_at_asc">
+                  Date: Earliest First
+                </SelectItem>
+                <SelectItem value="starts_at_desc">
+                  Date: Latest First
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Count */}
           <p className="text-sm text-stone-400 sm:ml-auto whitespace-nowrap">
             {totalItems > 0
@@ -259,16 +331,36 @@ export const HomePage = () => {
           </div>
         )}
 
-        {/* Active search badge */}
-        {search && (
-          <div className="flex items-center gap-2 mb-4 text-sm text-stone-500">
-            <span>Results for</span>
+        {/* Active filters badges & clear all */}
+        {isFiltered && (
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-sm text-stone-500">
+            <span>Active filters:</span>
+            {debouncedSearch && (
+              <button
+                onClick={clearSearch}
+                className="inline-flex items-center gap-1 bg-stone-100 border border-stone-200 text-stone-600 rounded px-2 py-0.5 text-xs hover:bg-stone-200 transition-colors"
+              >
+                "{debouncedSearch}"
+                <X className="h-3 w-3" />
+              </button>
+            )}
+            {sortBy === "starts_at" && (
+              <button
+                onClick={() => {
+                  setSortBy("created_at");
+                  setSortOrder("desc");
+                }}
+                className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-800 rounded px-2 py-0.5 text-xs hover:bg-amber-100 transition-colors font-medium"
+              >
+                Date: {sortOrder === "asc" ? "Earliest First" : "Latest First"}
+                <X className="h-3 w-3" />
+              </button>
+            )}
             <button
-              onClick={clearSearch}
-              className="inline-flex items-center gap-1 bg-stone-100 border border-stone-200 text-stone-600 rounded px-2 py-0.5 text-xs hover:bg-stone-200 transition-colors"
+              onClick={resetAllFilters}
+              className="text-xs text-stone-400 hover:text-stone-700 underline ml-1"
             >
-              "{search}"
-              <X className="h-3 w-3" />
+              Clear all filters
             </button>
           </div>
         )}
@@ -299,17 +391,14 @@ export const HomePage = () => {
               <CalendarDays className="h-10 w-10 text-stone-300 mx-auto mb-3" />
               <p className="text-stone-600 font-medium">No events found</p>
               <p className="text-stone-400 text-sm mt-1">
-                {search
-                  ? `Nothing matched "${search}".`
+                {debouncedSearch
+                  ? `Nothing matched "${debouncedSearch}".`
                   : "Nothing here yet. Try a different filter."}
               </p>
-              {(search || statusFilter !== "all") && (
+              {isFiltered && (
                 <button
                   id="clear-filters-btn"
-                  onClick={() => {
-                    clearSearch();
-                    setStatusFilter("all");
-                  }}
+                  onClick={resetAllFilters}
                   className="mt-4 text-sm text-stone-500 underline underline-offset-2 hover:text-stone-800"
                 >
                   Clear filters
