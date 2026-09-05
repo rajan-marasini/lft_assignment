@@ -1,11 +1,11 @@
 import cookieParser from "cookie-parser";
 import express from "express";
+import helmet from "helmet";
 import morgan from "morgan";
 
 import { CorsMiddleware } from "@/middleware/cors.middleware";
 import { handleError } from "@/middleware/error.handler";
-import { authRoute } from "@/routes";
-import helmet from "helmet";
+import { authRoute, eventRoute } from "@/routes";
 
 const app = express();
 
@@ -21,6 +21,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/auth", authRoute);
+app.use("/api/events", eventRoute);
 
 app.use(handleError);
 

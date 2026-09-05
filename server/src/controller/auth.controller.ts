@@ -15,13 +15,13 @@ import type {
   RegisterInput,
 } from "@/schemas/auth.schema";
 
-const COOKIE_MAX_AGE_30_DAYS = 30 * 24 * 60 * 60 * 1000;
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
 const REFRESH_TOKEN_COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
-  maxAge: COOKIE_MAX_AGE_30_DAYS,
+  maxAge: COOKIE_MAX_AGE,
 };
 
 export const RegisterUser = TryCatch(

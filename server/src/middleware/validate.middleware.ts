@@ -17,3 +17,20 @@ export const validate = (schema: ZodType) => {
     next();
   };
 };
+
+export const validateQuery = (schema: ZodType) => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.query || {});
+
+    if (!result.success) {
+      const errorMessage = result.error.issues
+        .map((issue) => issue.message)
+        .join(", ");
+      return next(new AppError(errorMessage, 400));
+    }
+
+    req.query = result.data as Record<string, any>;
+    next();
+  };
+};
+
