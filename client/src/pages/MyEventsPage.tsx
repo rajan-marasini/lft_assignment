@@ -64,7 +64,7 @@ export const MyEventsPage = () => {
           </div>
           <Link
             to="/events/create"
-            className={buttonVariants({ className: "gap-2" })}
+            className={buttonVariants({ className: "gap-2 rounded-none" })}
           >
             <CalendarPlus className="h-4 w-4" />
             Create Your First Event
