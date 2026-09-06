@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import db from "@/db";
 import { AppError } from "@/lib/errors";
 import { verifyAccessToken } from "@/lib/jwt";
 
@@ -51,3 +52,34 @@ export const optionalAuth = (
 
   next();
 };
+
+export const requireVerified = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user) {
+    return next(new AppError("Unauthorized", 401));
+  }
+
+  try {
+    const user = await db("users")
+      .select("is_verified")
+      .where({ id: req.user.userId })
+      .first();
+
+    if (!user || !user.is_verified) {
+      return next(
+        new AppError(
+          "Please verify your email address to perform this action.",
+          403,
+        ),
+      );
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+

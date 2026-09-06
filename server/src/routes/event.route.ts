@@ -2,7 +2,7 @@ import express from "express";
 
 import * as eventController from "@/controller/event.controller";
 import * as rsvpController from "@/controller/rsvp.controller";
-import { isAuthenticated, optionalAuth } from "@/middleware/auth.middleware";
+import { isAuthenticated, optionalAuth, requireVerified } from "@/middleware/auth.middleware";
 import { validate, validateQuery } from "@/middleware/validate.middleware";
 import {
   createEventSchema,
@@ -13,10 +13,11 @@ import { upsertRsvpSchema } from "@/schemas/rsvp.schema";
 
 const router = express.Router();
 
-// POST /api/events - Create new event (authenticated users only)
+// POST /api/events - Create new event (authenticated & verified users only)
 router.post(
   "/",
   isAuthenticated,
+  requireVerified,
   validate(createEventSchema),
   eventController.CreateEvent,
 );
@@ -32,16 +33,17 @@ router.get(
 // GET /api/events/:eventId - Get event details by ID
 router.get("/:eventId", optionalAuth, eventController.GetEventById);
 
-// PATCH /api/events/:eventId - Update existing event (creator only)
+// PATCH /api/events/:eventId - Update existing event (creator only & verified)
 router.patch(
   "/:eventId",
   isAuthenticated,
+  requireVerified,
   validate(updateEventSchema),
   eventController.UpdateEvent,
 );
 
-// DELETE /api/events/:eventId - Delete event (creator only)
-router.delete("/:eventId", isAuthenticated, eventController.DeleteEvent);
+// DELETE /api/events/:eventId - Delete event (creator only & verified)
+router.delete("/:eventId", isAuthenticated, requireVerified, eventController.DeleteEvent);
 
 // --- RSVP Routes ---
 
@@ -52,12 +54,14 @@ router.get("/:eventId/rsvp", optionalAuth, rsvpController.GetEventRsvpSummary);
 router.post(
   "/:eventId/rsvp",
   isAuthenticated,
+  requireVerified,
   validate(upsertRsvpSchema),
   rsvpController.UpsertRsvp,
 );
 
 // DELETE /api/events/:eventId/rsvp - Remove RSVP status
-router.delete("/:eventId/rsvp", isAuthenticated, rsvpController.DeleteRsvp);
+router.delete("/:eventId/rsvp", isAuthenticated, requireVerified, rsvpController.DeleteRsvp);
 
 export default router;
+
 

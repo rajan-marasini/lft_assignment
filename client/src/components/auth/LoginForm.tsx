@@ -1,31 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail, Send } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { useState } from "react";
-import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { Link, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLogin, useResendVerification } from "@/hooks/useAuth";
+import { useLogin } from "@/hooks/useAuth";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth.schema";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   
   const isVerifiedBanner = searchParams.get("verified") === "true";
   const isUnverifiedBanner = searchParams.get("unverified") === "true";
 
   const { mutate: login, isPending } = useLogin();
-  const { mutate: resendVerification, isPending: isResending, isSuccess: isResendSuccess } = useResendVerification();
 
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -36,21 +32,7 @@ export const LoginForm = () => {
   });
 
   const onSubmit = (data: LoginFormData) => {
-    setUnverifiedEmail(null);
-    login(data, {
-      onError: (err: AxiosError) => {
-        if (err.response?.status === 403) {
-          setUnverifiedEmail(data.email);
-        }
-      },
-    });
-  };
-
-  const handleResend = () => {
-    const targetEmail = unverifiedEmail || getValues("email");
-    if (targetEmail) {
-      resendVerification({ email: targetEmail });
-    }
+    login(data);
   };
 
   return (
@@ -66,42 +48,6 @@ export const LoginForm = () => {
         <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 rounded-md text-xs flex items-center gap-2">
           <Mail className="h-4 w-4 shrink-0" />
           Registration successful! We sent a verification link to your email.
-        </div>
-      )}
-
-      {unverifiedEmail && (
-        <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-md text-xs space-y-2">
-          <div className="flex items-start gap-2 font-medium">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-            <span>Email verification required before logging in.</span>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleResend}
-            disabled={isResending}
-            className="w-full text-xs h-8 border-amber-500/30 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300"
-          >
-            {isResending ? (
-              <span className="flex items-center gap-1.5">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Sending verification link...
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5">
-                <Send className="h-3 w-3" />
-                Resend Verification Email
-              </span>
-            )}
-          </Button>
-        </div>
-      )}
-
-      {isResendSuccess && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-md text-xs flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          A new verification link has been sent to your inbox.
         </div>
       )}
 

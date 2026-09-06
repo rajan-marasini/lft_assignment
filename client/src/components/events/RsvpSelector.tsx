@@ -55,6 +55,19 @@ export const RsvpSelector = ({
     );
   }
 
+  if (user.is_verified === false) {
+    return (
+      <div className="bg-amber-50/60 border border-amber-200/80 rounded-lg p-4 text-center">
+        <p className="text-sm font-medium text-amber-900 mb-1">
+          Verification Required to RSVP
+        </p>
+        <p className="text-xs text-amber-700/80">
+          Please verify your email address to RSVP for events.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-2xs">
       <div className="flex items-center justify-between mb-4">

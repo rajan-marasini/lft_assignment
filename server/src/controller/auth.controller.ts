@@ -98,12 +98,6 @@ export const LoginUser = TryCatch(
       throw new AppError("Invalid email or password", 401);
     }
 
-    if (!user.is_verified) {
-      throw new AppError(
-        "Please verify your email address before logging in. Check your inbox for the verification link.",
-        403,
-      );
-    }
 
     const tokenPayload = { userId: user.id, email: user.email };
 
@@ -239,9 +233,6 @@ export const RefreshToken = TryCatch(
       throw new AppError("User associated with token no longer exists", 404);
     }
 
-    if (!user.is_verified) {
-      throw new AppError("Please verify your email address first", 403);
-    }
 
     const tokenPayload = { userId: user.id, email: user.email };
 

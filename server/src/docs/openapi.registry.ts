@@ -155,10 +155,6 @@ registry.registerPath({
       description: "Invalid credentials",
       content: { "application/json": { schema: ErrorResponseSchema } },
     },
-    403: {
-      description: "Email not verified",
-      content: { "application/json": { schema: ErrorResponseSchema } },
-    },
   },
 });
 

@@ -25,6 +25,7 @@ interface EventFormProps {
   onSubmit: (values: EventFormValues) => void;
   isSubmitting?: boolean;
   submitLabel?: string;
+  disabled?: boolean;
 }
 
 export const EventForm = ({
@@ -32,6 +33,7 @@ export const EventForm = ({
   onSubmit,
   isSubmitting = false,
   submitLabel = "Save Event",
+  disabled = false,
 }: EventFormProps) => {
   // Format initial starts_at string for datetime-local input format (YYYY-MM-DDTHH:mm)
   const formatDatetimeLocal = (dateStr?: string) => {
@@ -238,7 +240,7 @@ export const EventForm = ({
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || disabled}
               className="px-6 font-medium rounded-none"
             >
               {isSubmitting ? "Saving..." : submitLabel}

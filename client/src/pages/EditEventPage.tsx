@@ -1,23 +1,25 @@
-import { ArrowLeft, Edit3, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Edit3, Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
 import { EventForm } from "@/components/events/EventForm";
 import { buttonVariants } from "@/components/ui/button";
+import { useCurrentUser } from "@/hooks/useAuth";
 import { useGetEventById, useUpdateEvent } from "@/hooks/useEvents";
 import type { EventFormValues } from "@/lib/validations/event.schema";
-import { useAuthStore } from "@/stores/use-auth-store";
 
 export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+  const { data: userData } = useCurrentUser();
+  const user = userData;
 
   const { data, isLoading, error } = useGetEventById(id || "");
   const { mutate: updateEvent, isPending: isUpdating } = useUpdateEvent();
 
   const event = data?.data?.event;
+  const isUnverified = user?.is_verified === false;
 
   // Authorization check: if event is loaded and user is not the creator, redirect
   useEffect(() => {
@@ -53,7 +55,7 @@ export const EditEventPage = () => {
   }
 
   const handleSubmit = (values: EventFormValues) => {
-    if (!id) return;
+    if (!id || isUnverified) return;
     updateEvent(
       {
         id,
@@ -99,6 +101,18 @@ export const EditEventPage = () => {
         </div>
       </div>
 
+      {isUnverified && (
+        <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg flex items-start gap-3 text-sm">
+          <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="font-semibold">Email Verification Required</h4>
+            <p className="text-amber-800 text-xs">
+              You must verify your email address before updating event details. Please check your inbox for the verification link.
+            </p>
+          </div>
+        </div>
+      )}
+
       <EventForm
         initialValues={{
           title: event.title,
@@ -111,9 +125,11 @@ export const EditEventPage = () => {
         onSubmit={handleSubmit}
         isSubmitting={isUpdating}
         submitLabel="Update Event"
+        disabled={isUnverified}
       />
     </div>
   );
 };
 
 export default EditEventPage;
+
