@@ -27,7 +27,7 @@ A modern, production-ready full-stack event planning web application built with 
 - [x] **Database & Backend**: Knex.js schema migration scripts, custom migration runner (`npm run db:migrate`), structured logging using Winston + Morgan.
 - [x] **Frontend Enhancements**: Reusable UI components (custom inputs, modals, cards, badges, date pickers, rich text editor, RSVP selector).
 - [x] **Testing & Documentation**: Unit test suite using Bun test runner (`bun test`), OpenAPI/Swagger interactive UI at `/docs`.
-- [x] **Advanced Authentication**: JWT access token + HTTP-only refresh token rotation pattern, as well as **Email Verification** using Nodemailer (HTML emails with 24-hour verification token links).
+- [x] **Advanced Authentication**: JWT access token + HTTP-only refresh token rotation pattern, as well as **Email Verification** using the **Brevo HTTP API** (HTML emails with 24-hour verification token links). *SMTP was replaced with Brevo's HTTP API because Render blocks all outbound SMTP ports (25, 465, 587) at the network level, causing persistent `ETIMEDOUT` errors regardless of the SMTP provider — HTTP API communicates over HTTPS (port 443) which is never blocked.*
 - [x] **Event Management Enhancements**: Multi-field search (title, description, location), multi-attribute sorting (starts_at, created_at, title, popularity), full RSVP system (`Yes`, `No`, `Maybe`).
 - [x] **Dockerization**: Fully dockerized application with `docker-compose.yml` orchestrating PostgreSQL, Express backend, and multi-stage Nginx frontend.
 - [x] **Bonus Questions**: Complete SQL solutions and step-by-step reasoning for Q1, Q2, and Q4 provided in [`bonus_question_answer.md`](file:///Users/rajanmarasini/Desktop/lft_assignment/bonus_question_answer.md).
@@ -51,7 +51,7 @@ A modern, production-ready full-stack event planning web application built with 
 ### Security Architecture
 
 - **Authentication**: Uses bcryptjs to salt and hash passwords. Issues short-lived Access Tokens (15 minutes) and long-lived Refresh Tokens (30 days). Access tokens can be sent via standard Authorization Bearer header or HTTP-only cookies.
-- **Email Verification**: Users receive a 24-hour verification link via Nodemailer upon signup. Login is restricted until the email is verified (`is_verified = true`), with full resend capabilities.
+- **Email Verification**: Users receive a 24-hour verification link via the **Brevo HTTP API** upon signup. Login is restricted until the email is verified (`is_verified = true`), with full resend capabilities.
 - **Authorization Middleware**: Protects API routes. Only the original `creator_id` of an event is authorized to mutate or delete that event.
 - **Security Middleware**: Includes Helmet for secure HTTP headers, CORS configuration with dynamic origins, and input sanitization via Zod.
 
@@ -152,6 +152,22 @@ The application will be accessible at `http://localhost:3000`.
 2. **Event Visibility**: `public` events are visible to all users (authenticated or guest), whereas `private` events are only visible to authenticated users or their creator.
 3. **RSVP Behavior**: Any logged-in user can update their RSVP status (`yes`, `no`, `maybe`) on any viewable event. A user can update their RSVP choice at any time.
 4. **Tag Normalization**: Tag names are automatically trimmed and converted to lowercase upon creation/search to prevent duplication (e.g., "Conference" and "conference" resolve to the same tag).
+
+---
+
+## Production Email Delivery (Brevo HTTP API)
+
+> **Why Brevo HTTP API instead of SMTP?**
+>
+> The backend is deployed on **Render**, which (like most cloud hosting platforms) **blocks all outbound SMTP ports** (25, 465, and 587) at the network level. This means standard SMTP-based email libraries such as `nodemailer` will always fail with `ETIMEDOUT` errors in this environment — regardless of the SMTP provider used (Gmail, Brevo SMTP, Zoho, etc.).
+>
+> To resolve this without migrating to a different hosting provider, the email transport was switched from `nodemailer` (SMTP) to the **[Brevo Transactional Email HTTP API](https://developers.brevo.com/reference/sendtransacemail)**, which communicates entirely over HTTPS (port 443) — a port that is never blocked.
+>
+> **Required environment variable on Render:**
+> - `BREVO_API_KEY` — Your Brevo API key from [app.brevo.com](https://app.brevo.com) → Settings → API Keys
+> - `SMTP_FROM` — A sender email address verified in your Brevo account
+>
+> **Locally / Docker Compose:** SMTP works fine on localhost. For local development you can set `BREVO_API_KEY` to a real key, or emails will simply log a warning and return `false` (registration still succeeds).
 
 ---
 
