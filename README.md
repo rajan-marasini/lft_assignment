@@ -1,5 +1,5 @@
 > [!NOTE]
-> **Bonus Question Solutions**: The solutions, SQL queries, and detailed reasoning for the assessment's **Bonus Questions (Q1, Q2, Q4)** can be found in [`bonus_question_answer.md`](bonus_question_answer.md).
+> **Bonus Question Solutions**: The solutions, SQL queries, and detailed reasoning for the assessment's **Bonus Questions (Q1, Q2, Q4)** can be found in [`bonus_question_answer.md`](bonus_question_answer.md). <br>
 > The application is live at [https://assignment.rajanmarasini.com.np](https://assignment.rajanmarasini.com.np)
 
 # Full-Stack Event Planning Application
