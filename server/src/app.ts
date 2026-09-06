@@ -7,6 +7,10 @@ import morgan from "morgan";
 import swaggerRoute from "@/docs/swagger.route";
 import { CorsMiddleware } from "@/middleware/cors.middleware";
 import { handleError } from "@/middleware/error.handler";
+import {
+  authLimiter,
+  globalLimiter,
+} from "@/middleware/rate-limit.middleware";
 import { authRoute, eventRoute, tagRoute } from "@/routes";
 
 const app = express();
@@ -20,6 +24,7 @@ app.use(morgan("dev"));
 app.use(CorsMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(globalLimiter);
 app.use(cookieParser());
 
 app.get("/", (_req, res) => {
@@ -31,7 +36,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/docs", swaggerRoute);
-app.use("/api/auth", authRoute);
+app.use("/api/auth", authLimiter, authRoute);
 app.use("/api/events", eventRoute);
 app.use("/api/tags", tagRoute);
 
