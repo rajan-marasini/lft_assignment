@@ -2,6 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  is_verified?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -9,6 +10,7 @@ export interface User {
 export interface AuthResponseData {
   user: User;
   accessToken?: string;
+  requiresVerification?: boolean;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -26,4 +28,8 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
+}
+
+export interface ResendVerificationPayload {
+  email: string;
 }

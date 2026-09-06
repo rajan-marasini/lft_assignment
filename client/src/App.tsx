@@ -13,6 +13,7 @@ import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import MyEventsPage from "@/pages/MyEventsPage";
 import RegisterPage from "@/pages/RegisterPage";
+import VerifyEmailPage from "@/pages/VerifyEmailPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,8 @@ const App = () => {
               </Route>
             </Route>
 
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+
             {/* Guest Routes */}
             <Route element={<GuestRoute />}>
               <Route path="/login" element={<LoginPage />} />
@@ -53,6 +56,5 @@ const App = () => {
     </QueryClientProvider>
   );
 };
-
 
 export default App;

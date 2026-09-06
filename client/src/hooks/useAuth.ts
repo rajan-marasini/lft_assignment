@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { authApi } from "@/api/auth.api";
 import { useAuthStore } from "@/stores/use-auth-store";
-import type { LoginPayload, RegisterPayload } from "@/types/auth.types";
+import type { LoginPayload, RegisterPayload, ResendVerificationPayload } from "@/types/auth.types";
 
 export const AUTH_QUERY_KEY = ["auth", "me"];
 
@@ -47,13 +47,44 @@ export const useRegister = () => {
     mutationFn: (payload: RegisterPayload) => authApi.register(payload),
     onSuccess: (data) => {
       toast.success(
-        data.message || "Registration successful! Please login to continue."
+        data.message || "Registration successful! Please check your email to verify your account."
       );
-      navigate("/login");
+      navigate("/login?unverified=true");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       const errorMessage =
         error.response?.data?.message || "Registration failed. Please try again.";
+      toast.error(errorMessage);
+    },
+  });
+};
+
+export const useVerifyEmail = () => {
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (token: string) => authApi.verifyEmail(token),
+    onSuccess: (data) => {
+      toast.success(data.message || "Email verified successfully! You can now log in.");
+      navigate("/login?verified=true");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      const errorMessage =
+        error.response?.data?.message || "Verification failed or token expired.";
+      toast.error(errorMessage);
+    },
+  });
+};
+
+export const useResendVerification = () => {
+  return useMutation({
+    mutationFn: (payload: ResendVerificationPayload) => authApi.resendVerification(payload),
+    onSuccess: (data) => {
+      toast.success(data.message || "Verification email sent. Please check your inbox.");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      const errorMessage =
+        error.response?.data?.message || "Failed to resend verification email.";
       toast.error(errorMessage);
     },
   });

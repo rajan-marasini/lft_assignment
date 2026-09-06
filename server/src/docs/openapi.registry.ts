@@ -48,6 +48,7 @@ const UserSchema = registry.register(
     id: z.uuid(),
     name: z.string(),
     email: z.email(),
+    is_verified: z.boolean().default(false),
     created_at: z.string(),
     updated_at: z.string(),
   }),
@@ -153,6 +154,70 @@ registry.registerPath({
     401: {
       description: "Invalid credentials",
       content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+    403: {
+      description: "Email not verified",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/auth/verify-email",
+  summary: "Verify user email address using token",
+  tags: ["Authentication"],
+  request: {
+    query: z.object({
+      token: z.string().openapi({ description: "Email verification token" }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Email verified successfully",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid or expired token",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/auth/resend-verification",
+  summary: "Resend email verification link",
+  tags: ["Authentication"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            email: z.string().email(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Verification email sent if account exists",
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            message: z.string(),
+          }),
+        },
+      },
     },
   },
 });

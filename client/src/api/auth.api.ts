@@ -5,6 +5,7 @@ import type {
   AuthResponseData,
   LoginPayload,
   RegisterPayload,
+  ResendVerificationPayload,
   User,
 } from "@/types/auth.types";
 
@@ -31,6 +32,16 @@ export const authApi = {
       "/auth/register",
       payload
     );
+    return response.data;
+  },
+
+  verifyEmail: async (token: string): Promise<ApiResponse<void>> => {
+    const response = await apiClient.get<ApiResponse<void>>(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+    return response.data;
+  },
+
+  resendVerification: async (payload: ResendVerificationPayload): Promise<ApiResponse<void>> => {
+    const response = await apiClient.post<ApiResponse<void>>("/auth/resend-verification", payload);
     return response.data;
   },
 

@@ -24,7 +24,7 @@ A modern, production-ready full-stack event planning web application built with 
 - [x] **Database & Backend**: Knex.js schema migration scripts, custom migration runner (`npm run db:migrate`), structured logging using Winston + Morgan.
 - [x] **Frontend Enhancements**: Reusable UI components (custom inputs, modals, cards, badges, date pickers, rich text editor, RSVP selector).
 - [x] **Testing & Documentation**: Unit test suite using Bun test runner (`bun test`), OpenAPI/Swagger interactive UI at `/docs`.
-- [x] **Advanced Authentication**: JWT access token + HTTP-only refresh token rotation pattern.
+- [x] **Advanced Authentication**: JWT access token + HTTP-only refresh token rotation pattern, as well as **Email Verification** using Nodemailer (HTML emails with 24-hour verification token links).
 - [x] **Event Management Enhancements**: Multi-field search (title, description, location), multi-attribute sorting (starts_at, created_at, title, popularity), full RSVP system (`Yes`, `No`, `Maybe`).
 - [x] **Dockerization**: Fully dockerized application with `docker-compose.yml` orchestrating PostgreSQL, Express backend, and multi-stage Nginx frontend.
 
@@ -38,7 +38,7 @@ A modern, production-ready full-stack event planning web application built with 
 - **Backend (Node.js + Express + TypeScript + Bun)**: Built using Express with TypeScript for strict type safety across request handlers and middleware. Bun is utilized as the ultra-fast JavaScript runtime and test runner.
 - **Database & Query Builder (PostgreSQL + Knex.js)**: Knex.js was selected as requested to ensure direct control over SQL query generation without an ORM overhead. It handles database connections, connection pooling (`min: 2, max: 10`), transactional operations, and schema migrations.
 - **Normalized Schema**:
-  - `users`: ID, name, email, password hash, timestamp fields.
+  - `users`: ID, name, email, password hash, `is_verified`, `verification_token`, `verification_token_expires_at`, timestamp fields.
   - `events`: ID, title, description, starts_at, location, visibility (`public`/`private`), creator_id (FK -> `users.id`), timestamp fields.
   - `tags`: ID, name (unique).
   - `event_tags`: Junction table (`event_id`, `tag_id`) for many-to-many relationships.
@@ -47,6 +47,7 @@ A modern, production-ready full-stack event planning web application built with 
 ### Security Architecture
 
 - **Authentication**: Uses bcryptjs to salt and hash passwords. Issues short-lived Access Tokens (15 minutes) and long-lived Refresh Tokens (30 days). Access tokens can be sent via standard Authorization Bearer header or HTTP-only cookies.
+- **Email Verification**: Users receive a 24-hour verification link via Nodemailer upon signup. Login is restricted until the email is verified (`is_verified = true`), with full resend capabilities.
 - **Authorization Middleware**: Protects API routes. Only the original `creator_id` of an event is authorized to mutate or delete that event.
 - **Security Middleware**: Includes Helmet for secure HTTP headers, CORS configuration with dynamic origins, and input sanitization via Zod.
 
@@ -137,7 +138,7 @@ bun install
 bun run dev
 ```
 
-The application will be accessible at `http://localhost:5173`.
+The application will be accessible at `http://localhost:3000`.
 
 ---
 

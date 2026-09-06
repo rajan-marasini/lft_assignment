@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import { loginSchema, registerSchema } from "../auth.schema";
+import {
+  loginSchema,
+  registerSchema,
+  resendVerificationSchema,
+  verifyEmailQuerySchema,
+} from "../auth.schema";
 import { createEventSchema, getEventsQuerySchema } from "../event.schema";
 import { upsertRsvpSchema } from "../rsvp.schema";
 
@@ -41,6 +46,16 @@ describe("Validation Schemas", () => {
         password: "password123",
       });
       expect(result.success).toBe(true);
+    });
+
+    it("should validate verify email token query", () => {
+      expect(verifyEmailQuerySchema.safeParse({ token: "abc123token" }).success).toBe(true);
+      expect(verifyEmailQuerySchema.safeParse({ token: "" }).success).toBe(false);
+    });
+
+    it("should validate resend verification email input", () => {
+      expect(resendVerificationSchema.safeParse({ email: "user@example.com" }).success).toBe(true);
+      expect(resendVerificationSchema.safeParse({ email: "invalid-email" }).success).toBe(false);
     });
   });
 
