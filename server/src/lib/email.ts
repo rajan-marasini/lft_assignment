@@ -71,8 +71,14 @@ export async function sendVerificationEmail(
   `;
 
   try {
+    const fromAddress =
+      process.env.SMTP_FROM ||
+      (smtpUser
+        ? `"Event Planner" <${smtpUser}>`
+        : `"Event Planner" <noreply@eventplanner.com>`);
+
     const info = await transporter.sendMail({
-      from: `"Event Planner<"noreply@eventplanner.com">`,
+      from: fromAddress,
       to: toEmail,
       subject: "Verify Your Email Address - Event Planner",
       html: htmlContent,
