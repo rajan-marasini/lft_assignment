@@ -1,6 +1,11 @@
 import { type CorsOptions } from "cors";
 
-const allowedOrigins = ["http://localhost:3000", "http://localhost:5173"];
+const CLIENT_URL = process.env.CLIENT_URL;
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  ...(CLIENT_URL ? [CLIENT_URL, CLIENT_URL.replace(/\/$/, "")] : []),
+];
 
 export const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
