@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Bonus Question Solutions**: The solutions, SQL queries, and detailed reasoning for the assessment's **Bonus Questions (Q1, Q2, Q4)** can be found in [`bonus_question_answer.md`](bonus_question_answer.md).
+
 # Full-Stack Event Planning Application
 
 A modern, production-ready full-stack event planning web application built with **React**, **TypeScript**, **Node.js (Express)**, **Knex.js**, and **PostgreSQL**. Featuring secure JWT authentication, rich interactive event management, real-time filtering, tag assignment, RSVP tracking, custom pagination/sorting, OpenAPI/Swagger documentation, and containerization with Docker Compose.
@@ -27,6 +30,7 @@ A modern, production-ready full-stack event planning web application built with 
 - [x] **Advanced Authentication**: JWT access token + HTTP-only refresh token rotation pattern, as well as **Email Verification** using Nodemailer (HTML emails with 24-hour verification token links).
 - [x] **Event Management Enhancements**: Multi-field search (title, description, location), multi-attribute sorting (starts_at, created_at, title, popularity), full RSVP system (`Yes`, `No`, `Maybe`).
 - [x] **Dockerization**: Fully dockerized application with `docker-compose.yml` orchestrating PostgreSQL, Express backend, and multi-stage Nginx frontend.
+- [x] **Bonus Questions**: Complete SQL solutions and step-by-step reasoning for Q1, Q2, and Q4 provided in [`bonus_question_answer.md`](file:///Users/rajanmarasini/Desktop/lft_assignment/bonus_question_answer.md).
 
 ---
 
@@ -151,6 +155,12 @@ The application will be accessible at `http://localhost:3000`.
 
 ---
 
+## 4. Bonus Questions
+
+Solutions, SQL queries, and detailed reasoning for the assessment's **Bonus Questions (Q1, Q2, Q4)** are provided in [bonus_question_answer.md](file:///Users/rajanmarasini/Desktop/lft_assignment/bonus_question_answer.md).
+
+---
+
 ## API Documentation & Links
 
 - **Swagger / OpenAPI Documentation**: `http://localhost:8000/docs`
@@ -165,3 +175,4 @@ The application will be accessible at `http://localhost:3000`.
   - `DELETE /api/events/:id` - Delete event (Creator only)
   - `POST /api/events/:id/rsvp` - Set RSVP status for an event
   - `GET /api/tags` - List popular tags
+
