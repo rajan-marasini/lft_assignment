@@ -1,25 +1,42 @@
-import nodemailer from "nodemailer";
-
 import logger from "@/lib/logger";
 
-const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
-const smtpUser = process.env.SMTP_USER;
-const smtpPassword = process.env.SMTP_PASSWORD;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+
+const senderEmail = process.env.SMTP_FROM;
+const senderName = "Event Planner";
 const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
-const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth:
-    smtpUser && smtpPassword
-      ? {
-          user: smtpUser,
-          pass: smtpPassword,
-        }
-      : undefined,
-});
+async function sendEmailViaBrevo(
+  toEmail: string,
+  toName: string,
+  subject: string,
+  htmlContent: string,
+): Promise<void> {
+  if (!BREVO_API_KEY) {
+    throw new Error("BREVO_API_KEY environment variable is not set");
+  }
+
+  const response = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers: {
+      "api-key": BREVO_API_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email: toEmail, name: toName }],
+      subject,
+      htmlContent,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Brevo API error ${response.status}: ${errorBody}`);
+  }
+}
 
 export async function sendVerificationEmail(
   toEmail: string,
@@ -71,20 +88,14 @@ export async function sendVerificationEmail(
   `;
 
   try {
-    const fromAddress =
-      process.env.SMTP_FROM ||
-      (smtpUser
-        ? `"Event Planner" <${smtpUser}>`
-        : `"Event Planner" <noreply@eventplanner.com>`);
+    await sendEmailViaBrevo(
+      toEmail,
+      name,
+      "Verify Your Email Address - Event Planner",
+      htmlContent,
+    );
 
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to: toEmail,
-      subject: "Verify Your Email Address - Event Planner",
-      html: htmlContent,
-    });
-
-    logger.info(`Verification email sent to ${toEmail}: ${info.messageId}`);
+    logger.info(`Verification email sent to ${toEmail} via Brevo API`);
     return true;
   } catch (error) {
     logger.error(`Failed to send verification email to ${toEmail}:`, error);
