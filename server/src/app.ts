@@ -7,10 +7,7 @@ import morgan from "morgan";
 import swaggerRoute from "@/docs/swagger.route";
 import { CorsMiddleware } from "@/middleware/cors.middleware";
 import { handleError } from "@/middleware/error.handler";
-import {
-  authLimiter,
-  globalLimiter,
-} from "@/middleware/rate-limit.middleware";
+import { authLimiter, globalLimiter } from "@/middleware/rate-limit.middleware";
 import { authRoute, eventRoute, tagRoute } from "@/routes";
 
 const app = express();

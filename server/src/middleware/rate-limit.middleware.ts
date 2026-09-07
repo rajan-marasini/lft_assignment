@@ -13,7 +13,7 @@ export const globalLimiter = rateLimit({
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 10,
+  limit: 30,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: {
@@ -36,7 +36,7 @@ export const eventMutationLimiter = rateLimit({
 
 export const rsvpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 60,
+  limit: 120,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: {

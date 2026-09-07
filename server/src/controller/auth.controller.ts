@@ -98,7 +98,6 @@ export const LoginUser = TryCatch(
       throw new AppError("Invalid email or password", 401);
     }
 
-
     const tokenPayload = { userId: user.id, email: user.email };
 
     const accessToken = generateAccessToken(tokenPayload);
@@ -232,7 +231,6 @@ export const RefreshToken = TryCatch(
     if (!user) {
       throw new AppError("User associated with token no longer exists", 404);
     }
-
 
     const tokenPayload = { userId: user.id, email: user.email };
 

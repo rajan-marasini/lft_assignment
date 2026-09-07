@@ -18,7 +18,11 @@ router.post("/login", validate(loginSchema), authController.LoginUser);
 
 router.get("/verify-email", authController.VerifyEmail);
 
-router.post("/resend-verification", validate(resendVerificationSchema), authController.ResendVerificationEmail);
+router.post(
+  "/resend-verification",
+  validate(resendVerificationSchema),
+  authController.ResendVerificationEmail,
+);
 
 router.post(
   "/refresh",

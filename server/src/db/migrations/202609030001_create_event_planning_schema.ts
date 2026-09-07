@@ -11,11 +11,25 @@ export async function up(knex: Knex): Promise<void> {
     table.string("name", 100).notNullable();
     table.string("email", 320).notNullable().unique();
     table.string("password_hash", 255).notNullable();
-    table.timestamp("created_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
-    table.timestamp("updated_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table
+      .timestamp("created_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
+    table
+      .timestamp("updated_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
 
-    table.check("char_length(trim(??)) >= 2", ["name"], "users_name_length_check");
-    table.check("?? = lower(??)", ["email", "email"], "users_email_lowercase_check");
+    table.check(
+      "char_length(trim(??)) >= 2",
+      ["name"],
+      "users_name_length_check",
+    );
+    table.check(
+      "?? = lower(??)",
+      ["email", "email"],
+      "users_email_lowercase_check",
+    );
   });
 
   await knex.schema.createTable(EVENTS, (table) => {
@@ -32,10 +46,20 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp("starts_at", { useTz: true }).notNullable();
     table.string("location", 255).notNullable();
     table.string("visibility", 10).notNullable().defaultTo("private");
-    table.timestamp("created_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
-    table.timestamp("updated_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table
+      .timestamp("created_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
+    table
+      .timestamp("updated_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
 
-    table.check("char_length(trim(??)) >= 1", ["title"], "events_title_not_blank_check");
+    table.check(
+      "char_length(trim(??)) >= 1",
+      ["title"],
+      "events_title_not_blank_check",
+    );
     table.check(
       "char_length(trim(??)) >= 1",
       ["description"],
@@ -46,20 +70,38 @@ export async function up(knex: Knex): Promise<void> {
       ["location"],
       "events_location_not_blank_check",
     );
-    table.check("?? in ('public', 'private')", ["visibility"], "events_visibility_check");
+    table.check(
+      "?? in ('public', 'private')",
+      ["visibility"],
+      "events_visibility_check",
+    );
 
     table.index(["starts_at", "id"], "events_starts_at_id_index");
     table.index(["creator_id", "starts_at"], "events_creator_starts_at_index");
-    table.index(["visibility", "starts_at"], "events_visibility_starts_at_index");
+    table.index(
+      ["visibility", "starts_at"],
+      "events_visibility_starts_at_index",
+    );
   });
 
   await knex.schema.createTable(TAGS, (table) => {
     table.uuid("id").primary().defaultTo(knex.fn.uuid());
     table.string("name", 50).notNullable().unique();
-    table.timestamp("created_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table
+      .timestamp("created_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
 
-    table.check("char_length(trim(??)) >= 1", ["name"], "tags_name_not_blank_check");
-    table.check("?? = lower(??)", ["name", "name"], "tags_name_lowercase_check");
+    table.check(
+      "char_length(trim(??)) >= 1",
+      ["name"],
+      "tags_name_not_blank_check",
+    );
+    table.check(
+      "?? = lower(??)",
+      ["name", "name"],
+      "tags_name_lowercase_check",
+    );
   });
 
   await knex.schema.createTable(EVENT_TAGS, (table) => {

@@ -41,10 +41,18 @@ export const getEventsQuerySchema = z
     status: z.enum(["upcoming", "past", "all"]).optional().default("all"),
     visibility: z.enum(["public", "private", "all"]).optional().default("all"),
     tag: z
-      .union([z.string(), z.array(z.string()), z.record(z.string(), z.string())])
+      .union([
+        z.string(),
+        z.array(z.string()),
+        z.record(z.string(), z.string()),
+      ])
       .optional(),
     "tag[]": z
-      .union([z.string(), z.array(z.string()), z.record(z.string(), z.string())])
+      .union([
+        z.string(),
+        z.array(z.string()),
+        z.record(z.string(), z.string()),
+      ])
       .optional(),
     search: z.string().trim().optional(),
     sortBy: z

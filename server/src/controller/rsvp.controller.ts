@@ -86,8 +86,14 @@ export const UpsertRsvp = TryCatch(
     }
 
     // Authorization check: if event is private and not creator, verify access
-    if (event.visibility === "private" && event.creator_id !== req.user.userId) {
-      throw new AppError("You do not have permission to access this event", 403);
+    if (
+      event.visibility === "private" &&
+      event.creator_id !== req.user.userId
+    ) {
+      throw new AppError(
+        "You do not have permission to access this event",
+        403,
+      );
     }
 
     try {
@@ -96,12 +102,10 @@ export const UpsertRsvp = TryCatch(
         .first();
 
       if (existingRsvp) {
-        await db("rsvps")
-          .where({ id: existingRsvp.id })
-          .update({
-            status,
-            updated_at: db.fn.now(),
-          });
+        await db("rsvps").where({ id: existingRsvp.id }).update({
+          status,
+          updated_at: db.fn.now(),
+        });
       } else {
         await db("rsvps").insert({
           event_id: eventId,
@@ -172,7 +176,10 @@ export const GetEventRsvpSummary = TryCatch(
       throw new AppError("Event not found", 404);
     }
 
-    if (event.visibility === "private" && event.creator_id !== req.user?.userId) {
+    if (
+      event.visibility === "private" &&
+      event.creator_id !== req.user?.userId
+    ) {
       throw new AppError("You do not have permission to view this event", 403);
     }
 

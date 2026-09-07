@@ -28,7 +28,11 @@ router.patch(
 );
 
 // DELETE /api/tags/:tagId - Delete a tag (authenticated & verified users only)
-router.delete("/:tagId", isAuthenticated, requireVerified, tagController.DeleteTag);
+router.delete(
+  "/:tagId",
+  isAuthenticated,
+  requireVerified,
+  tagController.DeleteTag,
+);
 
 export default router;
-

@@ -22,11 +22,21 @@ export async function up(knex: Knex): Promise<void> {
       .onUpdate("CASCADE")
       .onDelete("CASCADE");
     table.string("status", 10).notNullable().defaultTo("yes");
-    table.timestamp("created_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
-    table.timestamp("updated_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table
+      .timestamp("created_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
+    table
+      .timestamp("updated_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
 
     table.unique(["event_id", "user_id"], "rsvps_event_user_unique");
-    table.check("?? in ('yes', 'no', 'maybe')", ["status"], "rsvps_status_check");
+    table.check(
+      "?? in ('yes', 'no', 'maybe')",
+      ["status"],
+      "rsvps_status_check",
+    );
 
     table.index(["event_id", "status"], "rsvps_event_id_status_index");
     table.index(["user_id"], "rsvps_user_id_index");

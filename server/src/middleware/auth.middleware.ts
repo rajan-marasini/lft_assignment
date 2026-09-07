@@ -82,4 +82,3 @@ export const requireVerified = async (
     next(error);
   }
 };
-

@@ -4,7 +4,9 @@ import { logger } from "../lib/logger.ts";
 import { closeDatabaseConnection, db } from "./index.ts";
 
 const command = process.argv[2] ?? "latest";
-const migrationsDirectory = fileURLToPath(new URL("./migrations", import.meta.url));
+const migrationsDirectory = fileURLToPath(
+  new URL("./migrations", import.meta.url),
+);
 
 try {
   if (command === "latest") {
@@ -34,7 +36,9 @@ try {
       });
     }
   } else {
-    throw new Error(`Unknown migration command "${command}". Use "latest" or "rollback".`);
+    throw new Error(
+      `Unknown migration command "${command}". Use "latest" or "rollback".`,
+    );
   }
 } catch (error) {
   logger.error("Database migration failed", { error });

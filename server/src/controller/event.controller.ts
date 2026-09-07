@@ -128,7 +128,7 @@ async function attachMetadataToEvents(
 
 async function processTags(
   trx: Knex.Transaction,
-  tagNames: string[]
+  tagNames: string[],
 ): Promise<string[]> {
   if (!tagNames || tagNames.length === 0) return [];
 
@@ -378,9 +378,7 @@ export const GetEvents = TryCatch(
       baseQuery.orderBy(sortColumn, sortOrder);
     }
 
-    const eventsRows: EventRow[] = await baseQuery
-      .limit(limit)
-      .offset(offset);
+    const eventsRows: EventRow[] = await baseQuery.limit(limit).offset(offset);
 
     const formattedEvents = await attachMetadataToEvents(
       eventsRows,

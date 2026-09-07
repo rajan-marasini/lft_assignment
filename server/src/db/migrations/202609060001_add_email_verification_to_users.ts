@@ -6,7 +6,9 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.alterTable(USERS, (table) => {
     table.boolean("is_verified").notNullable().defaultTo(false);
     table.string("verification_token", 255).nullable();
-    table.timestamp("verification_token_expires_at", { useTz: true }).nullable();
+    table
+      .timestamp("verification_token_expires_at", { useTz: true })
+      .nullable();
     table.index(["verification_token"], "users_verification_token_index");
   });
 
